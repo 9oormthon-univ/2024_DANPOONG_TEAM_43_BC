@@ -13,19 +13,23 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Set up SSH for EC2
-      uses: webfactory/ssh-agent@v0.5.3
+    - name: Deploy to server
+      uses: appleboy/ssh-action@master
+      id: deploy
       with:
-        ssh-private-key: ${{ secrets.KEY }}
-
-    - name: Copy project to EC2
-      run: |
-        scp -r . ubuntu@${{ secrets.HOST }}:/home/ubuntu/project
-
-    - name: SSH into EC2 and run deployment script
-      run: |
-        ssh ec2-user@${{ secrets.HOST }} << 'EOF'
+        host: ${{ secrets.HOST }}
+        username: ubuntu
+        key: ${{ secrets.KEY }}
+        port: 22
+        envs: GITHUB_SHA
+        script: |
+          # Move to project directory or clone repository
+          cd /home/ubuntu/project || git clone https://github.com/<username>/<repository>.git /home/ubuntu/project
           cd /home/ubuntu/project
+
+          # Pull latest changes
+          git pull origin main
+
+          # Stop existing containers and rebuild
           docker-compose down || true
           docker-compose up -d --build
-        EOF
