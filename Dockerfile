@@ -1,20 +1,18 @@
-# Use Node.js 18 or higher
-FROM node:18
+# Base image
+FROM node:20
 
-# 작업 디렉토리 설정
+# Set working directory
 WORKDIR /app
 
-# 프로젝트 의존성 설치
-COPY package*.json ./
-
-# Install dependencies including Truffle
-RUN npm install
-
-# 프로젝트 파일 복사
+# Copy project files
 COPY . .
 
-# 포트 노출 (Ganache의 기본 포트인 7545 사용)
-EXPOSE 7545
+# Install dependencies
+RUN npm install -g truffle
+RUN npm install
 
-# 스마트 계약 배포 (npx 사용하여 로컬 설치된 truffle 사용)
-CMD ["npx", "truffle", "migrate", "--network", "development"]
+# Expose Ganache default port
+EXPOSE 8545
+
+# Default command
+CMD ["ganache-cli", "-h", "0.0.0.0"]
