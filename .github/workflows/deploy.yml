@@ -19,6 +19,13 @@ jobs:
         run: |
           docker run -d -p 7545:7545 trufflesuite/ganache-cli:latest
 
+
+      # 2. Fix permissions for npm
+      - name: Fix npm permissions
+        run: |
+          sudo chown -R $USER /usr/local/lib /usr/local/bin /usr/local/share
+
+
       # 2. Truffle 설치
       - name: Install Truffle
         run: npm install -g truffle
