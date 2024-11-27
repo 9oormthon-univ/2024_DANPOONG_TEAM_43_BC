@@ -22,11 +22,15 @@ jobs:
         key: ${{ secrets.KEY }}
         port: 22
         script: |
-          # 프로젝트 디렉토리 생성
-          mkdir -p /home/ubuntu/project
-          cd /home/ubuntu/project || git clone https://github.com/9oormthon-univ/2024_DANPOONG_TEAM_43_BC.git .
-          git pull origin main
+          # 프로젝트 디렉토리 생성 및 Git 클론/업데이트
+          if [ ! -d "/home/ubuntu/project/.git" ]; then
+            git clone https://github.com/9oormthon-univ/2024_DANPOONG_TEAM_43_BC.git /home/ubuntu/project
+          else
+            cd /home/ubuntu/project
+            git pull origin main
+          fi
 
           # Docker Compose 실행
+          cd /home/ubuntu/project
           docker-compose down || true
           docker-compose up -d --build
