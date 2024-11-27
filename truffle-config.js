@@ -29,7 +29,7 @@ module.exports = async function () {
     },
     compilers: {
       solc: {
-        version: "0.8.21",
+        version: "0.8.20",
       },
     },
   };
