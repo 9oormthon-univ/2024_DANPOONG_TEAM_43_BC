@@ -36,7 +36,6 @@ jobs:
       # 5. Truffle compile
       - name: Compile Truffle contracts
         run: truffle compile
-
         
       # 7. Docker build & push to Docker repo
       - name: Docker build & push to Docker repo
