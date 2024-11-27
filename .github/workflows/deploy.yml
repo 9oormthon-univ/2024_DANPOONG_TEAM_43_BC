@@ -1,82 +1,36 @@
-name: CD with Truffle
+name: Deploy with Ganache and Truffle
 
 on:
   push:
     branches:
-      - main  # main 브랜치에 push가 될 때 실행
+      - main
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout code
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      # 2. Install Docker
-      - name: Install Docker
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-          sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-          sudo apt-get update
-          sudo apt-get install -y docker-ce docker-ce-cli containerd.io
-          sudo usermod -aG docker $USER
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v2
 
-      # 3. Install Docker Compose
-      - name: Install Docker Compose
-        run: |
-          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          sudo chmod +x /usr/local/bin/docker-compose
+    - name: Build and run Docker container
+      run: |
+        docker build -t ganache-truffle .
+        docker run -d --name ganache -p 8545:8545 trufflesuite/ganache:latest
+        docker ps
 
-      # 4. Run Ganache Docker container
-      - name: Run Ganache Docker container
-        run: |
-          docker-compose up -d  # Ganache와 Truffle을 동시에 실행
+    - name: Install dependencies
+      run: |
+        docker exec ganache npm install -g truffle
 
-      # 5. Fix npm permissions
-      - name: Fix npm permissions
-        run: |
-          sudo chown -R $USER /usr/local/lib /usr/local/bin /usr/local/share
+    - name: Deploy contracts using Truffle
+      run: |
+        docker exec ganache truffle compile
+        docker exec ganache truffle migrate --network development
 
-      # 6. Install Truffle globally and dependencies
-      - name: Install dependencies
-        run: |
-          npm install -g truffle solc@0.8.21
-          npm install
-          npm install axios
-          npm install @openzeppelin/contracts
-
-      # 7. Truffle compile
-      - name: Compile Truffle contracts
-        run: truffle compile
-
-      # 8. Run Truffle migrations
-      - name: Run Truffle migrations
-        run: |
-          docker exec -it truffle /bin/sh -c "truffle migrate --network development"
-
-      # 9. Docker build & push to Docker repo
-      - name: Docker build & push to Docker repo
-        run: |
-          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
-          docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO }}/bc .
-          docker push ${{ secrets.DOCKER_REPO }}/bc
-
-      # 10. Deploy to server
-      - name: Deploy to server
-        uses: appleboy/ssh-action@master
-        id: deploy
-        with:
-          host: ${{ secrets.HOST }}
-          username: ubuntu
-          key: ${{ secrets.KEY }}
-          envs: GITHUB_SHA
-          script: |
-            sudo docker rm -f $(docker ps -qa)
-            sudo docker stop $(docker ps -a -q)
-            sudo docker pull ${{ secrets.DOCKER_REPO }}/bc
-            sudo docker-compose up --build -d
-            sudo docker image prune -f
+    - name: Verify deployment
+      run: |
+        docker exec ganache truffle test
