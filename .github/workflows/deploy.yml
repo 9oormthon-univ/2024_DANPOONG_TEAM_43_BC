@@ -37,10 +37,7 @@ jobs:
       - name: Compile Truffle contracts
         run: truffle compile
 
-      # 6. Migrate contracts
-      - name: Migrate contracts with Truffle
-        run: truffle migrate --network development
-
+        
       # 7. Docker build & push to Docker repo
       - name: Docker build & push to Docker repo
         run: |
