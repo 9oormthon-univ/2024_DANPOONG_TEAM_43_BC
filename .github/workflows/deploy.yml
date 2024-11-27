@@ -1,4 +1,4 @@
-name: Deploy with Ganache and Truffle
+name: Deploy Ganache and Truffle on EC2
 
 on:
   push:
@@ -13,24 +13,19 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Set up Docker
-      uses: docker/setup-buildx-action@v2
+    - name: Set up SSH for EC2
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.KEY }}
 
-    - name: Build and run Docker container
+    - name: Copy project to EC2
       run: |
-        docker build -t ganache-truffle .
-        docker run -d --name ganache -p 8545:8545 trufflesuite/ganache:latest
-        docker ps
+        scp -r . ec2-user@${{ secrets.HOST }}:/home/ubuntu/project
 
-    - name: Install dependencies
+    - name: SSH into EC2 and run deployment script
       run: |
-        docker exec ganache npm install -g truffle
-
-    - name: Deploy contracts using Truffle
-      run: |
-        docker exec ganache truffle compile
-        docker exec ganache truffle migrate --network development
-
-    - name: Verify deployment
-      run: |
-        docker exec ganache truffle test
+        ssh ec2-user@${{ secrets.HOST }} << 'EOF'
+          cd /home/ubuntu/project
+          docker-compose down || true
+          docker-compose up -d --build
+        EOF
