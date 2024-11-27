@@ -1,6 +1,5 @@
 name: CD with Truffle
 
-# push 이벤트가 발생할 때 실행
 on:
   push:
     branches:
@@ -11,49 +10,44 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 1. Ganache Docker 컨테이너 실행
+      # 2. Run Ganache Docker container
       - name: Run Ganache Docker container
         run: |
           docker run -d -p 7545:7545 trufflesuite/ganache-cli:latest
-
-
-      # 2. Fix permissions for npm
+          
+      # 3. Fix npm permissions
       - name: Fix npm permissions
         run: |
           sudo chown -R $USER /usr/local/lib /usr/local/bin /usr/local/share
 
-
-      # 2. Truffle 설치
-      - name: Install Truffle
-        run: npm install -g truffle
-
-      # 3. 프로젝트 의존성 설치
+      # 4. Install Truffle globally and dependencies
       - name: Install dependencies
         run: |
-            npm install
-            sudo npm install -g truffle solc@0.8.20  # solc 버전 지정하여 설치
-            sudo npm install axios
-            sudo npm install @openzeppelin/contracts
+          npm install -g truffle solc@0.8.20
+          npm install
+          npm install axios
+          npm install @openzeppelin/contracts
 
-      # 4. Truffle 컴파일
+      # 5. Truffle compile
       - name: Compile Truffle contracts
         run: truffle compile
 
-      # 5. 스마트 계약 배포 (이미 있는 truffle-config.js 파일을 사용)
+      # 6. Migrate contracts
       - name: Migrate contracts with Truffle
         run: truffle migrate --network development
 
-      # 6. Docker 이미지 빌드 및 푸시
+      # 7. Docker build & push to Docker repo
       - name: Docker build & push to Docker repo
         run: |
           docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
           docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO }}/bc .
           docker push ${{ secrets.DOCKER_REPO }}/bc
 
-      # 7. 기존에 실행되는 컨테이너 모두 멈추고 새 이미지를 pull 후 실행
+      # 8. Deploy to server
       - name: Deploy to server
         uses: appleboy/ssh-action@master
         id: deploy
