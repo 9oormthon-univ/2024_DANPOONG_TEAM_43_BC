@@ -37,7 +37,7 @@ jobs:
       - name: Compile Truffle contracts
         run: truffle compile
         
-      # 7. Docker build & push to Docker repo
+      # 6. Docker build & push to Docker repo
       - name: Docker build & push to Docker repo
         run: |
           docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
