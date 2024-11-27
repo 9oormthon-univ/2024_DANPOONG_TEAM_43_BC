@@ -18,6 +18,7 @@ jobs:
       - name: Run Ganache Docker container
         run: |
           docker run -d -p 7545:7545 trufflesuite/ganache-cli:latest
+          sleep 30  # Increased sleep time
           
       # 3. Fix npm permissions
       - name: Fix npm permissions
