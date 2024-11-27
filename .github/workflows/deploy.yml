@@ -23,7 +23,7 @@ jobs:
           sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
           sudo apt-get update
           sudo apt-get install -y docker-ce docker-ce-cli containerd.io
-          sudo usermod -aG docker $USER  # Grant docker permissions to the current user
+          sudo usermod -aG docker $USER
 
       # 3. Install Docker Compose
       - name: Install Docker Compose
@@ -34,8 +34,7 @@ jobs:
       # 4. Run Ganache Docker container
       - name: Run Ganache Docker container
         run: |
-          docker run -d -p 7545:7545 trufflesuite/ganache-cli:latest
-          sleep 30  # Increased sleep time to ensure Ganache is fully started
+          docker-compose up -d  # 두 컨테이너를 동시에 실행
 
       # 5. Fix npm permissions
       - name: Fix npm permissions
@@ -71,19 +70,6 @@ jobs:
           key: ${{ secrets.KEY }}
           envs: GITHUB_SHA
           script: |
-            # Install Docker on the remote server
-            sudo apt-get update
-            sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-            sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-            sudo apt-get update
-            sudo apt-get install -y docker-ce docker-ce-cli containerd.io
-      
-            # Install Docker Compose on the remote server
-            sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-            sudo chmod +x /usr/local/bin/docker-compose
-      
-            # Run Docker commands
             sudo docker rm -f $(docker ps -qa)
             sudo docker stop $(docker ps -a -q)
             sudo docker pull ${{ secrets.DOCKER_REPO }}/bc
