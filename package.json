@@ -13,7 +13,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@openzeppelin/contracts": "^5.1.0",
+    "@openzeppelin/contracts": "^4.9.3",
     "axios": "^1.7.8",
     "solc": "^0.8.20",
     "web3": "^4.15.0"
