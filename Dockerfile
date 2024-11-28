@@ -10,11 +10,11 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
+# Install dependencies (including OpenZeppelin Contracts)
 RUN npm install
-
-# Install OpenZeppelin Contracts explicitly
-RUN npm install @openzeppelin/contracts
 
 # Copy the rest of the application files
 COPY . .
+
+# Default command
+CMD ["truffle", "compile"]
