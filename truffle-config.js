@@ -1,4 +1,6 @@
 module.exports = {
+  contracts_directory: "./contracts", // Solidity 파일이 위치한 경로
+  contracts_build_directory: "./build/contracts", // 컴파일된 파일 저장 경로
   networks: {
     development: {
       host: "127.0.0.1",  // Use localhost IP address
