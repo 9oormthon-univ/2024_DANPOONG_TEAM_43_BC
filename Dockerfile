@@ -1,6 +1,9 @@
 # Base image
 FROM node:20
 
+# Install essential tools
+RUN apt-get update && apt-get install -y git bash
+
 # Install Truffle and Ganache CLI globally
 RUN npm install -g truffle ganache-cli
 
@@ -10,14 +13,11 @@ ENV PATH="/usr/local/bin:$PATH"
 # Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Clone Git repository
+RUN git clone https://github.com/your-repo/your-project.git /app
 
 # Install project dependencies
 RUN npm install
-
-# Copy the rest of the application files
-COPY . .
 
 # Expose Ganache port
 EXPOSE 7545
