@@ -22,5 +22,5 @@ COPY . .
 # Expose Ganache port
 EXPOSE 7545
 
-# Use an entrypoint script for Ganache and Truffle
+# Default command to run Ganache and Truffle
 CMD ["sh", "-c", "ganache-cli --host 0.0.0.0 --port 7545 & truffle compile && truffle migrate --network development"]
