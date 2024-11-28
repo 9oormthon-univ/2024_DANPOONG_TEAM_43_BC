@@ -7,8 +7,14 @@ RUN npm install -g truffle
 # Set working directory
 WORKDIR /app
 
-# Copy project files to container
-COPY . .
+# Copy package files
+COPY package*.json ./
 
-# Install project dependencies and OpenZeppelin Contracts
-RUN npm install && npm install @openzeppelin/contracts
+# Install dependencies
+RUN npm install
+
+# Install OpenZeppelin Contracts explicitly
+RUN npm install @openzeppelin/contracts
+
+# Copy the rest of the application files
+COPY . .
