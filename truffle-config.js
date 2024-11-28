@@ -11,7 +11,7 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: "0.8.21",  // Ensure the Solidity version matches your contracts
+      version: "0.8.20",  // Ensure the Solidity version matches your contracts
     },
   },
 };
